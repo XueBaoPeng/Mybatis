@@ -9,13 +9,18 @@
             <!-- 配置数据库连接信息 -->
             <dataSource type="POOLED">
                 <property name="driver" value="com.mysql.jdbc.Driver"/>
-                <property name="url" value="jdbc:mysql://localhost:3306/mybatis?useUnicode=true&amp;characterEncoding=UTF-8"/>
+                <property name="url"
+                          value="jdbc:mysql://localhost:3306/mybatis?useUnicode=true&amp;characterEncoding=UTF-8"/>
                 <property name="username" value="root"/>
                 <property name="password" value=""/>
             </dataSource>
         </environment>
     </environments>
-    <mappers >
+    <mappers>
+        <!--方式一：注册用户userMapper.xml文件
+        注意：IDEA中不支持编译.xml文件所以只能放在resources文件夹-->
         <mapper resource="userMapper.xml"/>
+        <!--方式二 ：注册用户userMapper映射接口-->
+        <mapper class="xbp.mybatis.mapping.UserMapperI"/>
     </mappers>
 </configuration>
