@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace要使用类的全名称，不然会报错-->
+<mapper namespace="xbp.mybatis.mapping.teacherMapper">
+
+    <!--根据班级id查询班级信息(带老师的信息)
+     ##1. 联表查询
+     SELECT * FROM class c,teacher t where c.teacherId=t.teacherId and c.classId=1;
+
+      ##2. 执行两次查询
+      SELECT * From class where classId=1;
+      SELECT * FROM teacher where teacherId=1;//使用上面得到的teacher_id
+       方式一：嵌套结果：使用嵌套结果映射来处理重复的联合结果的子集
+              封装联表查询的数据(去除重复的数据)
+         select * from class c, teacher t where c.teacher_id=t.t_id and c.c_id=1
+    -->
+    <!--MyBatis中使用association标签来解决一对一的关联查询，association标签可用的属性如下：
+          property:对象属性的名称
+          javaType:对象属性的类型
+          column:所对应的外键字段名称
+          select:使用另一个查询封装的结果
+-->
+
+    <select id="getClass" parameterType="int" resultMap="ClassResultMap">
+        SELECT * FROM class c,teacher t where c.teacherId=t.teacherId AND c.classId=#{id}
+    </select>
+    <!-- 使用resultMap映射实体类和字段之间的一一对应关系 -->
+    <resultMap id="ClassResultMap" type="xbp.mybatis.domain.Classes" >
+        <id property="id" column="classId"/>
+        <result property="name" column="className"/>
+        <association property="teacher"  column="teacherId" javaType="xbp.mybatis.domain.Teacher">
+            <id property="id" column="teacherId"/>
+            <result property="name" column="teacherName"/>
+        </association>
+
+    </resultMap>
+
+    <!--
+    方式二：嵌套查询：通过执行另外一个SQL映射语句来返回预期的复杂类型
+         SELECT * FROM class WHERE c_id=1;
+       SELECT * FROM teacher WHERE t_id=1   //1 是上一个查询得到的teacher_id的值-->
+
+    <select id="getClass2" parameterType="int" resultMap="ClassResultMap2">
+        SELECT * FROM class where classId=#{id}
+    </select>
+
+    <!-- 使用resultMap映射实体类和字段之间的一一对应关系 -->
+    <resultMap id="ClassResultMap2" type="xbp.mybatis.domain.Classes">
+        <id property="id" column="classId"/>
+        <result property="name" column="className"/>
+        <association property="teacher" column="teacherId" select="getTeacher"/>
+    </resultMap>
+
+    <select id="getTeacher" parameterType="int" resultMap="xbp.mybatis.domain.Teacher">
+        SELECT teacherId id,teacherName name FROM  teacher WHERE teacherId=#{id}
+    </select>
+
+
+    <!--根据classId查询对应的班级信息,包括学生,老师
+
+    方式一: 嵌套结果: 使用嵌套结果映射来处理重复的联合结果的子集
+   SELECT * FROM class c, teacher t,student s WHERE c.teacher_id=t.t_id AND c.C_id=s.class_id AND  c.c_id=1-->
+<select id="getClass3" parameterType="int" resultMap="ClassResultMap3">
+    SELECT * FROM  class c,teacher t, student s where c.teacherId=t.teacherId AND c.classId=s.classId AND c.classId=#{id}
+</select>
+
+   <resultMap id="ClassResultMap3" type="xbp.mybatis.domain.Classes">
+       <id property="id" column="classId"/>
+       <result property="name" column="className"/>
+       <association property="teacher" column="teacherId" javaType="xbp.mybatis.domain.Teacher">
+           <id property="id" column="teacherId"/>
+           <result property="name" column="teacherName"/>
+       </association>
+       <!-- ofType指定students集合中的对象类型 -->
+       <!--MyBatis中使用collection标签来解决一对多的关联查询，ofType属性指定集合中元素的对象类型。-->
+       <collection property="students" ofType="xbp.mybatis.domain.Classes">
+           <id property="id" column="studentId"/>
+           <result property="name" column="studentName"/>
+       </collection>
+   </resultMap>
+
+    <!-- 方式二：嵌套查询：通过执行另外一个SQL映射语句来返回预期的复杂类型
+      SELECT * FROM class WHERE c_id=1;
+      SELECT * FROM teacher WHERE t_id=1   //1 是上一个查询得到的teacher_id的值
+      SELECT * FROM student WHERE class_id=1  //1是第一个查询得到的c_id字段的值-->
+<select id="getClass4" parameterType="int" resultMap="ClassResultMap4">
+    SELECT  * FROM class where classId=#{id}
+</select>
+<resultMap id="ClassResultMap4" type="xbp.mybatis.domain.Classes">
+    <id property="id" column="classId"/>
+    <result property="name" column="className"/>
+    <association property="teacher" column="teacherId" javaType="xbp.mybatis.domain.Teacher"  select="getTeacher2"/>
+</resultMap>
+
+    <select id="getTeacher2" parameterType="int" resultType="xbp.mybatis.domain.Teacher">
+        SELECT teacherId,teacherName FROM teacher where teacherId=#{id}
+    </select>
+
+    <select id="getStudent" parameterType="int" resultType="xbp.mybatis.domain.Student">
+        SELECT studentId,studentName, FROM student where classId=#{id}
+    </select>
+
+</mapper>

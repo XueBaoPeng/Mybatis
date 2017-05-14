@@ -6,13 +6,18 @@
     <properties resource="db.properties"/>
 
     <!-- 配置实体类的别名，配置实体类别名的目的是为了在引用实体类时可以使用实体类的别名来代替实体类，达到简写的目的 -->
+    <!--<typeAliases>要放在<environments>之前，还要保证在<properties>之后，不然会报错-->
+    <!--这块配置需要注意配置文件的先后顺序。
+The content of element type "configuration" must match "(properties?,settings?,typeAliases?,typeHandlers?,objectFactory?,objectWrapperFactory?,plugins?,environments?,databaseIdProvider?,mappe-->
     <typeAliases>
         <!-- 为实体类xbp.mybatis.domain.User配置一个别名User -->
-        <!-- <typeAlias type="xbp.mybatis.domain.User" alias="User"/> -->
+         <typeAlias type="xbp.mybatis.domain.User" alias="User"/>
+        <typeAlias type="xbp.mybatis.domain.Teacher" alias="Teacher"/>
+        <typeAlias type="xbp.mybatis.domain.Classes" alias="Classes"/>
         <!-- 为xbp.mybatis.domain包下的所有实体类配置别名，MyBatis默认的设置别名的方式就是去除类所在的包后的简单的类名
         比如xbp.mybatis.domain.User这个实体类的别名就会被设置成User
          -->
-        <package name="xbp.mybatis.domain"/>
+        <!--<package name="xbp.mybatis.domain"/>-->
     </typeAliases>
 
 
@@ -37,6 +42,7 @@
         注意：IDEA中不支持编译.xml文件所以只能放在resources文件夹-->
         <mapper resource="userMapper.xml"/>
         <!--方式二 ：注册用户userMapper映射接口-->
-        <mapper class="xbp.mybatis.mapping.UserMapperI"/>
+        <!--<mapper class="xbp.mybatis.mapping.UserMapperI"/>-->
+        <mapper resource="classMapper.xml"/>
     </mappers>
 </configuration>
